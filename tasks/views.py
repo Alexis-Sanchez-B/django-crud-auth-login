@@ -38,7 +38,7 @@ def signup(request):
 
 
 def tasks(request):
-    tasks = Task.objects.filter(user=request.user)
+    tasks = Task.objects.filter(user=request.user,  datecompleted__isnull=True)
     return render(request, 'tasks.html', {
         'tasks': tasks
     })
@@ -96,6 +96,12 @@ def complete_task(request, task_id):
     if request.method == 'POST':
         task.datecompleted = timezone.now()
         task.save()
+        return redirect('tasks')
+    
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, pk = task_id, user = request.user)
+    if request.method == 'POST':
+        task.delete()
         return redirect('tasks')
 
 def singout(request):

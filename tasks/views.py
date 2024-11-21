@@ -40,33 +40,57 @@ def signup(request):
 
 def tasks(request):
     tasks = Task.objects.filter(user=request.user)
-    return render(request, 'tasks.html',{
+    return render(request, 'tasks.html', {
         'tasks': tasks
     })
 
+
 def create_task(request):
     if request.method == 'GET':
-     return render(request, 'create_task.html',{
-        'form': TaskForm
-     })
+        return render(request, 'create_task.html', {
+            'form': TaskForm
+        })
     else:
-       try:
-           form = TaskForm(request.POST)
-           new_task = form.save(commit=False)
-           new_task.user = request.user
-           new_task.save()
-           return redirect('tasks')
-       except ValueError:
-           return render(request, 'create_task.html',{
-           'form': TaskForm,
-           'error': 'Please provide valida data'
+        try:
+            form = TaskForm(request.POST)
+            new_task = form.save(commit=False)
+            new_task.user = request.user
+            new_task.save()
+            return redirect('tasks')
+        except ValueError:
+            return render(request, 'create_task.html', {
+                'form': TaskForm,
+                'error': 'Please provide valida data'
             })
 
-def task_detail(request,task_id):
-    task = get_object_or_404(Task, pk=task_id)
-    return render(request,'task_detail.html',{
-        'task': task
-    })
+
+def task_detail(request, task_id):
+    if request == 'GET':
+        task = get_object_or_404(Task, pk=task_id, user = request.user)
+        form = TaskForm(instance=task)
+        return render(request, 'task_detail.html', {
+            'task': task,
+            'form': form
+        })
+    else:
+        try:
+            task = get_object_or_404(Task, pk=task_id, user = request.user)
+            form = TaskForm(request.POST, instance=task)
+            form = TaskForm(request.POST, instance=task)
+            if form.is_valid():
+                form.save()
+                return redirect('tasks')  # Redirige a la lista de tareas
+            else:
+                return render(request, 'task_detail.html', {
+                    'task': task,
+                    'form': form,  # Muestra errores en el formulario
+                })
+        except ValueError:
+            return render(request, 'task_detail.html', {
+                'task': task,
+                'form': form,
+                'error': "Error updating task"
+            })
 
 
 def singout(request):
@@ -91,4 +115,3 @@ def sigin(request):
         else:
             login(request, user)
             return redirect('tasks')
-

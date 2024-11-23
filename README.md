@@ -1,3 +1,3 @@
 # django-crud-auth
 
-se agrega informacion
+se agrega informacion 
